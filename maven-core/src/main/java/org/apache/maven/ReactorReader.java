@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -325,22 +326,26 @@ class ReactorReader
         }
 
         return RepositoryUtils.toArtifacts( project.getAttachedArtifacts() ).stream()
-                .filter( artifact -> attachedArtifactComparison( requestedArtifact, artifact ) )
+                .filter( isRequestedArtifact( requestedArtifact ) )
                 .findFirst()
                 .orElse( null );
     }
 
-    private boolean attachedArtifactComparison( Artifact requested, Artifact attached )
+    /**
+     * We are taking as much as we can from the DefaultArtifact.equals(). The requested artifact has no file, so we want
+     * to remove that from the comparison.
+     *
+     * @param requestArtifact checked against the given artifact.
+     * @return true if equals, false otherwise.
+     */
+    private Predicate<Artifact> isRequestedArtifact( Artifact requestArtifact )
     {
-        //
-        // We are taking as much as we can from the DefaultArtifact.equals(). The requested artifact has no file so
-        // we want to remove that from the comparison.
-        //
-        return requested.getArtifactId().equals( attached.getArtifactId() )
-            && requested.getGroupId().equals( attached.getGroupId() )
-            && requested.getVersion().equals( attached.getVersion() )
-            && requested.getExtension().equals( attached.getExtension() )
-            && requested.getClassifier().equals( attached.getClassifier() );
+        return s -> s.getArtifactId().equals( requestArtifact.getArtifactId() )
+                && s.getGroupId().equals( requestArtifact.getGroupId() )
+                && s.getVersion().equals( requestArtifact.getVersion() )
+                && s.getExtension().equals( requestArtifact.getExtension() )
+                && s.getClassifier().equals( requestArtifact.getClassifier() );
+
     }
 
     /**
