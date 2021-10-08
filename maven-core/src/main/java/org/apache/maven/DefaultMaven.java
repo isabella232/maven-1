@@ -19,6 +19,22 @@ package org.apache.maven;
  * under the License.
  */
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.execution.BuildResumptionAnalyzer;
 import org.apache.maven.execution.BuildResumptionDataRepository;
@@ -58,20 +74,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -250,7 +252,7 @@ public class DefaultMaven
 
         eventCatapult.fire( ExecutionEvent.Type.ProjectDiscoveryStarted, session, null );
 
-        Result<? extends ProjectDependencyGraph> graphResult = buildGraph( session, result );
+        Result<? extends ProjectDependencyGraph> graphResult = buildGraph( session );
 
         if ( graphResult.hasErrors() )
         {
@@ -306,7 +308,7 @@ public class DefaultMaven
         // not expected that a participant will add or remove projects from the session.
         //
 
-        graphResult = buildGraph( session, result );
+        graphResult = buildGraph( session );
 
         if ( graphResult.hasErrors() )
         {
@@ -671,7 +673,7 @@ public class DefaultMaven
         return index;
     }
 
-    private Result<? extends ProjectDependencyGraph> buildGraph( MavenSession session, MavenExecutionResult result )
+    private Result<? extends ProjectDependencyGraph> buildGraph( MavenSession session )
     {
         Result<? extends ProjectDependencyGraph> graphResult = graphBuilder.build( session );
         for ( ModelProblem problem : graphResult.getProblems() )
